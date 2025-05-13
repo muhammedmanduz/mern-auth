@@ -1,12 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { set } from "mongoose";
 
 const SingnUp = () => {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -32,6 +34,7 @@ const SingnUp = () => {
         setError(true);
         return;
       }
+      navigate("/sign-in");
     } catch (error) {
       setLoading(false);
       setError(true);
@@ -67,17 +70,17 @@ const SingnUp = () => {
 
         <button
           disabled={loading}
-          className="bg-slate-700 text-white  p-3 rounded-lg uppercase hover:opacity-95 disabled::opacity-80"
+          className="bg-slate-700 text-white  p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
         >
-          Sign Up
+          {loading ? "Loading..." : "Sign Up"}
         </button>
       </form>
       <div className="flex gap-2 mt-5">
         <p>Have an account?</p>
-        <Link>
+        <Link to={"/sign-in"}>
           <span className="text-blue-500">Sing in</span>
         </Link>
-        <p className="text-red-500 mb-5">{error && "Something went wrong!"}</p>
+        <p className="text-red-700 mb-5">{error && "Something went wrong!"}</p>
       </div>
     </div>
   );
