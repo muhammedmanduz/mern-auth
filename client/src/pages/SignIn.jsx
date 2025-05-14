@@ -1,12 +1,21 @@
 import React from "react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInstart,
+  signInFailure,
+  signInSuccess,
+} from "../redux/user/userSlice";
 
-const SingnIn = () => {
+const SignIn = () => {
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { loading, error } = useSelector((state) => state.user);
+
+  console.log(loading, error);
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -15,9 +24,8 @@ const SingnIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      setError(false);
-      const res = await fetch("/api/auth/signup", {
+      dispatch(signInstart());
+      const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,15 +35,14 @@ const SingnIn = () => {
       const data = await res.json();
       console.log(data);
 
-      setLoading(false);
       if (data.success === false) {
-        setError(true);
+        dispatch(signInFailure(data.message));
         return;
       }
+      dispatch(signInSuccess(data));
       navigate("/");
     } catch (error) {
-      setLoading(false);
-      setError(true);
+      dispatch(signInFailure(error));
     }
   };
 
@@ -63,18 +70,25 @@ const SingnIn = () => {
           disabled={loading}
           className="bg-slate-700 text-white  p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
         >
-          Sign Up
+          {loading ? "Loading..." : "Sign In"}
         </button>
+
+        {/* Hata mesajı formun altında ve daha belirgin */}
+        {error && (
+          <p className="text-red-600 text-center mt-4">
+            {typeof error === "string" ? error : "Something went wrong!"}
+          </p>
+        )}
       </form>
-      <div className="flex gap-2 mt-5">
-        <p>Dont Have an account?</p>
-        <Link to={"/sign-up"}>
-          <span className="text-blue-500">Sing Up</span>
+
+      <div className="flex gap-2 mt-5 justify-center">
+        <p>Don't have an account?</p>
+        <Link to="/sign-up">
+          <span className="text-blue-500">Sign up</span>
         </Link>
-        <p className="text-red-500 mb-5">{error && "Something went wrong!"}</p>
       </div>
     </div>
   );
 };
 
-export default SingnIn;
+export default SignIn;
